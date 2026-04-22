@@ -1,0 +1,13 @@
+# Dependencies
+node_modules/
+
+# Playwright / test artifacts
+tests/
+test-results/
+playwright-report/
+.playwright/
+
+# Local test configs generated for e2e
+playwright.config.js
+package.json
+package-lock.json
