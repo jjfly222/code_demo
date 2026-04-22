@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>软件商城管理页面</title>
+  <style>
+    :root {
+      --bg-1: #f6f8ff;
+      --bg-2: #fff4ea;
+      --card: rgba(255, 255, 255, 0.86);
+      --text: #1f2a44;
+      --sub-text: #5b6781;
+      --accent: #ff6a3d;
+      --accent-2: #006dff;
+      --ok: #18a957;
+      --warn: #e39a00;
+      --danger: #d94343;
+      --line: rgba(31, 42, 68, 0.12);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: "PingFang SC", "Noto Sans SC", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 10% 10%, #dbe8ff 0, transparent 40%),
+        radial-gradient(circle at 85% 15%, #ffe7d6 0, transparent 38%),
+        linear-gradient(135deg, var(--bg-1), var(--bg-2));
+      padding: 22px;
+    }
+
+    .panel {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.55);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      box-shadow: 0 20px 48px rgba(30, 47, 90, 0.12);
+      overflow: hidden;
+      animation: rise .7s ease-out both;
+    }
+
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(22px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .header {
+      padding: 26px 28px 18px;
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .title {
+      margin: 0;
+      font-size: 28px;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      margin: 6px 0 0;
+      color: var(--sub-text);
+      font-size: 14px;
+    }
+
+    .badge {
+      align-self: flex-start;
+      background: linear-gradient(135deg, var(--accent), #ff8e3d);
+      color: #fff;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-weight: 600;
+      font-size: 13px;
+    }
+
+    .stats {
+      padding: 18px 28px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(150px, 1fr));
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .stat {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .stat span {
+      color: var(--sub-text);
+      font-size: 12px;
+    }
+
+    .stat strong {
+      display: block;
+      margin-top: 6px;
+      font-size: 24px;
+    }
+
+    .toolbar {
+      padding: 16px 28px;
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .toolbar input,
+    .toolbar select {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 12px;
+      font-size: 14px;
+      height: 42px;
+      padding: 0 12px;
+      color: var(--text);
+    }
+
+    .toolbar input {
+      flex: 1 1 280px;
+      min-width: 220px;
+    }
+
+    .toolbar select {
+      width: 180px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      padding: 0 8px 10px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 900px;
+      background: #fff;
+    }
+
+    th,
+    td {
+      text-align: left;
+      padding: 14px 12px;
+      border-bottom: 1px solid #eef1f6;
+      font-size: 14px;
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--sub-text);
+      font-size: 13px;
+      font-weight: 600;
+      background: #f8faff;
+      position: sticky;
+      top: 0;
+    }
+
+    tbody tr {
+      transition: transform .18s ease, box-shadow .18s ease;
+    }
+
+    tbody tr:hover {
+      transform: translateY(-1px);
+      box-shadow: inset 0 0 0 999px rgba(0, 109, 255, 0.04);
+    }
+
+    .tag {
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 600;
+      display: inline-block;
+    }
+
+    .ok { background: rgba(24, 169, 87, .12); color: var(--ok); }
+    .warn { background: rgba(227, 154, 0, .14); color: var(--warn); }
+    .danger { background: rgba(217, 67, 67, .12); color: var(--danger); }
+
+    .actions button {
+      border: 0;
+      border-radius: 8px;
+      padding: 7px 10px;
+      font-size: 12px;
+      margin-right: 6px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .btn-edit { background: var(--accent-2); }
+    .btn-up { background: var(--accent); }
+    .btn-approve { background: var(--ok); }
+    .btn-down { background: var(--danger); }
+
+    @media (max-width: 900px) {
+      .stats {
+        grid-template-columns: repeat(2, minmax(120px, 1fr));
+      }
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 12px; }
+      .header,
+      .stats,
+      .toolbar { padding-left: 14px; padding-right: 14px; }
+      .title { font-size: 22px; }
+      .toolbar select { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <section class="header">
+      <div>
+        <h1 class="title">软件商城管理中心</h1>
+        <p class="subtitle">用于管理上架软件、价格、库存和审核状态</p>
+      </div>
+      <div class="badge">今日订单 286</div>
+    </section>
+
+    <section class="stats">
+      <article class="stat"><span>在售软件</span><strong id="onSaleCount">0</strong></article>
+      <article class="stat"><span>待审核</span><strong id="pendingCount">0</strong></article>
+      <article class="stat"><span>总库存</span><strong id="stockCount">0</strong></article>
+      <article class="stat"><span>平均评分</span><strong id="avgRating">0</strong></article>
+    </section>
+
+    <section class="toolbar">
+      <input id="searchInput" type="text" placeholder="搜索软件名称，例如：微信、VS Code、Chrome">
+      <select id="categorySelect">
+        <option value="all">全部分类</option>
+        <option value="办公">办公</option>
+        <option value="社交">社交</option>
+        <option value="开发">开发</option>
+        <option value="设计">设计</option>
+        <option value="安全">安全</option>
+      </select>
+      <select id="statusSelect">
+        <option value="all">全部状态</option>
+        <option value="在售">在售</option>
+        <option value="待审核">待审核</option>
+        <option value="下架">下架</option>
+      </select>
+    </section>
+
+    <section class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>软件名称</th>
+            <th>分类</th>
+            <th>平台</th>
+            <th>单价</th>
+            <th>库存</th>
+            <th>评分</th>
+            <th>状态</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="softwareTableBody"></tbody>
+      </table>
+    </section>
+  </main>
+
+  <script>
+    const softwareList = [
+      { name: "微信", category: "社交", platform: "Windows / macOS", price: 0, stock: 9999, rating: 4.7, status: "在售" },
+      { name: "QQ", category: "社交", platform: "Windows / macOS", price: 0, stock: 8600, rating: 4.5, status: "在售" },
+      { name: "WPS Office", category: "办公", platform: "Windows / macOS", price: 168, stock: 420, rating: 4.6, status: "在售" },
+      { name: "Microsoft 365", category: "办公", platform: "Windows / macOS", price: 498, stock: 195, rating: 4.8, status: "在售" },
+      { name: "Google Chrome 企业版", category: "办公", platform: "Windows / macOS", price: 0, stock: 5000, rating: 4.4, status: "在售" },
+      { name: "Visual Studio Code", category: "开发", platform: "Windows / macOS / Linux", price: 0, stock: 7000, rating: 4.9, status: "在售" },
+      { name: "JetBrains IntelliJ IDEA", category: "开发", platform: "Windows / macOS / Linux", price: 1099, stock: 110, rating: 4.8, status: "待审核" },
+      { name: "Adobe Photoshop", category: "设计", platform: "Windows / macOS", price: 888, stock: 68, rating: 4.7, status: "在售" },
+      { name: "Figma", category: "设计", platform: "Web / Windows / macOS", price: 199, stock: 230, rating: 4.8, status: "在售" },
+      { name: "360 安全卫士", category: "安全", platform: "Windows", price: 0, stock: 3400, rating: 4.2, status: "下架" }
+    ];
+
+    const bodyEl = document.getElementById("softwareTableBody");
+    const searchEl = document.getElementById("searchInput");
+    const categoryEl = document.getElementById("categorySelect");
+    const statusEl = document.getElementById("statusSelect");
+
+    function statusClass(status) {
+      if (status === "在售") return "ok";
+      if (status === "待审核") return "warn";
+      return "danger";
+    }
+
+    function renderTable() {
+      const keyword = searchEl.value.trim().toLowerCase();
+      const category = categoryEl.value;
+      const status = statusEl.value;
+
+      const result = softwareList.filter(item => {
+        const byName = item.name.toLowerCase().includes(keyword);
+        const byCategory = category === "all" || item.category === category;
+        const byStatus = status === "all" || item.status === status;
+        return byName && byCategory && byStatus;
+      });
+
+      bodyEl.innerHTML = result.map(item => `
+        <tr data-name="${item.name}">
+          <td>${item.name}</td>
+          <td>${item.category}</td>
+          <td>${item.platform}</td>
+          <td>￥${item.price}</td>
+          <td>${item.stock}</td>
+          <td>${item.rating.toFixed(1)}</td>
+          <td><span class="tag ${statusClass(item.status)}">${item.status}</span></td>
+          <td class="actions">
+            <button class="btn-edit">编辑</button>
+            ${item.status === "待审核"
+              ? '<button class="btn-approve" data-action="approve">审核通过</button>'
+              : item.status === "下架"
+                ? '<button class="btn-up" data-action="up">上架</button>'
+                : '<button class="btn-down" data-action="down">下架</button>'}
+          </td>
+        </tr>
+      `).join("");
+
+      const onSale = softwareList.filter(s => s.status === "在售").length;
+      const pending = softwareList.filter(s => s.status === "待审核").length;
+      const stock = softwareList.reduce((sum, s) => sum + s.stock, 0);
+      const avg = (softwareList.reduce((sum, s) => sum + s.rating, 0) / softwareList.length).toFixed(1);
+
+      document.getElementById("onSaleCount").textContent = onSale;
+      document.getElementById("pendingCount").textContent = pending;
+      document.getElementById("stockCount").textContent = stock;
+      document.getElementById("avgRating").textContent = avg;
+    }
+
+    searchEl.addEventListener("input", renderTable);
+    categoryEl.addEventListener("change", renderTable);
+    statusEl.addEventListener("change", renderTable);
+    bodyEl.addEventListener("click", event => {
+      const actionBtn = event.target.closest("button[data-action]");
+      if (!actionBtn) return;
+
+      const row = actionBtn.closest("tr[data-name]");
+      if (!row) return;
+
+      const targetName = row.dataset.name;
+      const target = softwareList.find(item => item.name === targetName);
+      if (!target) return;
+
+      if (actionBtn.dataset.action === "approve") target.status = "在售";
+      if (actionBtn.dataset.action === "up") target.status = "在售";
+      if (actionBtn.dataset.action === "down") target.status = "下架";
+
+      renderTable();
+    });
+
+    renderTable();
+  </script>
+</body>
+</html>

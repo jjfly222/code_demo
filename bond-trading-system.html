@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>债券交易系统 | Bond Trading System</title>
+    <style>
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111625;
+            --bg-tertiary: #1a1f35;
+            --bg-card: #141a2e;
+            --border-color: #2a3150;
+            --text-primary: #e0e6ff;
+            --text-secondary: #8892b8;
+            --text-muted: #4a5078;
+            --accent-cyan: #00f0ff;
+            --accent-blue: #0066ff;
+            --accent-purple: #7b2fff;
+            --accent-green: #00ff88;
+            --accent-red: #ff3366;
+            --accent-orange: #ff9500;
+            --gradient-1: linear-gradient(135deg, #00f0ff 0%, #0066ff 100%);
+            --gradient-2: linear-gradient(135deg, #7b2fff 0%, #0066ff 100%);
+            --glow-cyan: 0 0 20px rgba(0, 240, 255, 0.3);
+            --glow-blue: 0 0 20px rgba(0, 102, 255, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 背景动画 */
+        .bg-animation {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(ellipse at 20% 80%, rgba(0, 102, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 20%, rgba(123, 47, 255, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 50% 50%, rgba(0, 240, 255, 0.03) 0%, transparent 70%);
+        }
+
+        .grid-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-image:
+                linear-gradient(rgba(0, 240, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+        }
+
+        /* 顶部导航 */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+            background: rgba(17, 22, 37, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo-icon {
+            width: 45px;
+            height: 45px;
+            background: var(--gradient-1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .logo-text {
+            font-size: 1.4rem;
+            font-weight: 700;
+            background: var(--gradient-1);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: 2px;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            padding: 0.6rem 1.2rem;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            color: var(--text-primary);
+            background: var(--bg-tertiary);
+            border-color: var(--border-color);
+        }
+
+        .nav-link.active {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.1);
+        }
+
+        .nav-right {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+        }
+
+        .user-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--gradient-2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        /* 主容器 */
+        .container {
+            padding: 1.5rem 2rem;
+        }
+
+        /* 页面标题 */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+        }
+
+        .page-title::before {
+            content: '';
+            width: 4px;
+            height: 28px;
+            background: var(--gradient-1);
+            border-radius: 2px;
+        }
+
+        .market-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: var(--bg-card);
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-green);
+            box-shadow: 0 0 10px var(--accent-green);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* 网格布局 */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: auto auto 1fr;
+            gap: 1rem;
+        }
+
+        /* 卡片通用样式 */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-1);
+            opacity: 0.5;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .card-title {
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .card-title-icon {
+            width: 8px;
+            height: 8px;
+            background: var(--accent-cyan);
+            border-radius: 50%;
+            box-shadow: var(--glow-cyan);
+        }
+
+        /* 统计卡片 */
+        .stat-card {
+            grid-column: span 1;
+        }
+
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+        }
+
+        .stat-change {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .stat-change.positive {
+            color: var(--accent-green);
+        }
+
+        .stat-change.negative {
+            color: var(--accent-red);
+        }
+
+        /* 主图表区域 */
+        .chart-main {
+            grid-column: span 3;
+            min-height: 350px;
+        }
+
+        .chart-container {
+            height: 280px;
+            display: flex;
+            align-items: flex-end;
+            gap: 4px;
+            padding-top: 1rem;
+            position: relative;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: var(--gradient-1);
+            border-radius: 4px 4px 0 0;
+            opacity: 0.8;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .chart-bar:hover {
+            opacity: 1;
+            box-shadow: var(--glow-cyan);
+        }
+
+        .chart-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        /* 债券列表 */
+        .bond-list-card {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        .bond-list {
+            list-style: none;
+        }
+
+        .bond-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid rgba(42, 49, 80, 0.5);
+        }
+
+        .bond-item:last-child {
+            border-bottom: none;
+        }
+
+        .bond-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+
+        .bond-code {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .bond-name {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .bond-price {
+            text-align: right;
+        }
+
+        .bond-yield {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--accent-cyan);
+        }
+
+        .bond-change {
+            font-size: 0.75rem;
+        }
+
+        /* 交易订单簿 */
+        .order-book-card {
+            grid-column: span 2;
+        }
+
+        .order-book {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+            font-size: 0.85rem;
+        }
+
+        .order-header {
+            color: var(--text-muted);
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .order-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.4rem 0;
+            border-radius: 4px;
+        }
+
+        .order-row.bid {
+            background: rgba(0, 255, 136, 0.05);
+        }
+
+        .order-row.ask {
+            background: rgba(255, 51, 102, 0.05);
+        }
+
+        .order-price-bid {
+            color: var(--accent-green);
+        }
+
+        .order-price-ask {
+            color: var(--accent-red);
+        }
+
+        /* 最新交易 */
+        .recent-trades-card {
+            grid-column: span 2;
+        }
+
+        .trade-list {
+            list-style: none;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .trade-item {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            padding: 0.6rem 0;
+            border-bottom: 1px solid rgba(42, 49, 80, 0.3);
+            font-size: 0.85rem;
+        }
+
+        .trade-item:last-child {
+            border-bottom: none;
+        }
+
+        .trade-type.buy {
+            color: var(--accent-green);
+        }
+
+        .trade-type.sell {
+            color: var(--accent-red);
+        }
+
+        /* 快速交易面板 */
+        .quick-trade-card {
+            grid-column: span 1;
+            grid-row: span 2;
+        }
+
+        .trade-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .trade-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .trade-tab {
+            flex: 1;
+            padding: 0.7rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .trade-tab.buy {
+            background: rgba(0, 255, 136, 0.1);
+            color: var(--accent-green);
+            border: 1px solid var(--accent-green);
+        }
+
+        .trade-tab.buy.active {
+            background: var(--accent-green);
+            color: var(--bg-primary);
+            box-shadow: 0 0 15px rgba(0, 255, 136, 0.3);
+        }
+
+        .trade-tab.sell {
+            background: rgba(255, 51, 102, 0.1);
+            color: var(--accent-red);
+            border: 1px solid var(--accent-red);
+        }
+
+        .trade-tab.sell.active {
+            background: var(--accent-red);
+            color: white;
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .form-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .form-input {
+            padding: 0.8rem 1rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.1);
+        }
+
+        .trade-btn {
+            padding: 1rem;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-top: auto;
+        }
+
+        .trade-btn.buy {
+            background: var(--gradient-1);
+            color: var(--bg-primary);
+        }
+
+        .trade-btn.sell {
+            background: linear-gradient(135deg, #ff3366 0%, #ff6b6b 100%);
+            color: white;
+        }
+
+        .trade-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 240, 255, 0.2);
+        }
+
+        /* 市场深度图 */
+        .market-depth-card {
+            grid-column: span 2;
+        }
+
+        .depth-chart {
+            height: 150px;
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .depth-bar {
+            flex: 1;
+            border-radius: 2px;
+            transition: all 0.2s;
+        }
+
+        .depth-bar.bid {
+            background: linear-gradient(to top, rgba(0, 255, 136, 0.3), rgba(0, 255, 136, 0.8));
+        }
+
+        .depth-bar.ask {
+            background: linear-gradient(to top, rgba(255, 51, 102, 0.3), rgba(255, 51, 102, 0.8));
+        }
+
+        /* 持仓概览 */
+        .positions-card {
+            grid-column: span 2;
+        }
+
+        .positions-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+
+        .positions-table th {
+            text-align: left;
+            padding: 0.8rem 0.5rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .positions-table td {
+            padding: 0.8rem 0.5rem;
+            border-bottom: 1px solid rgba(42, 49, 80, 0.3);
+        }
+
+        .positions-table tr:hover td {
+            background: rgba(0, 240, 255, 0.03);
+        }
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* 徽章样式 */
+        .badge {
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .badge-up {
+            background: rgba(0, 255, 136, 0.15);
+            color: var(--accent-green);
+        }
+
+        .badge-down {
+            background: rgba(255, 51, 102, 0.15);
+            color: var(--accent-red);
+        }
+
+        /* 响应式 */
+        @media (max-width: 1400px) {
+            .dashboard-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stat-card,
+            .chart-main,
+            .bond-list-card,
+            .order-book-card,
+            .recent-trades-card,
+            .quick-trade-card,
+            .market-depth-card,
+            .positions-card {
+                grid-column: span 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .nav-links {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* 加载动画 */
+        .loading-pulse {
+            animation: loadingPulse 1.5s infinite;
+        }
+
+        @keyframes loadingPulse {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+
+        /* 数字滚动效果 */
+        @keyframes numberScroll {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(0); }
+        }
+
+        /* 工具提示 */
+        .tooltip {
+            position: relative;
+        }
+
+        .tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 0.5rem 0.8rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 100;
+        }
+
+        .tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+    </style>
+</head>
+<body>
+    <!-- 背景动画 -->
+    <div class="bg-animation"></div>
+    <div class="grid-overlay"></div>
+
+    <!-- 导航栏 -->
+    <nav class="navbar">
+        <div class="logo">
+            <div class="logo-icon">B</div>
+            <span class="logo-text">BOND TRADING</span>
+        </div>
+        <div class="nav-links">
+            <a href="#" class="nav-link active">交易大厅</a>
+            <a href="#" class="nav-link">市场分析</a>
+            <a href="#" class="nav-link">持仓管理</a>
+            <a href="#" class="nav-link">交易历史</a>
+            <a href="#" class="nav-link">资金管理</a>
+            <a href="#" class="nav-link">系统设置</a>
+        </div>
+        <div class="nav-right">
+            <div class="user-profile">
+                <div class="user-avatar">T</div>
+                <span class="user-name">Trader_01</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 页面标题 -->
+        <div class="page-header">
+            <h1 class="page-title">交易大厅</h1>
+            <div class="market-status">
+                <span class="status-dot"></span>
+                <span>市场交易中</span>
+            </div>
+        </div>
+
+        <!-- 仪表盘网格 -->
+        <div class="dashboard-grid">
+            <!-- 统计卡片 -->
+            <div class="card stat-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>总成交额</span>
+                </div>
+                <div class="stat-value">¥ 2.84 亿</div>
+                <div class="stat-change positive">
+                    <span>↑</span>
+                    <span>12.5% 较昨日</span>
+                </div>
+            </div>
+
+            <div class="card stat-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>活跃债券</span>
+                </div>
+                <div class="stat-value">156 只</div>
+                <div class="stat-change positive">
+                    <span>↑</span>
+                    <span>8 只新增</span>
+                </div>
+            </div>
+
+            <div class="card stat-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>我的持仓</span>
+                </div>
+                <div class="stat-value">¥ 8,450,000</div>
+                <div class="stat-change negative">
+                    <span>↓</span>
+                    <span>2.3% 较昨日</span>
+                </div>
+            </div>
+
+            <div class="card stat-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>可用资金</span>
+                </div>
+                <div class="stat-value">¥ 12,680,000</div>
+                <div class="stat-change positive">
+                    <span>↑</span>
+                    <span>5.8% 可用</span>
+                </div>
+            </div>
+
+            <!-- 主图表 -->
+            <div class="card chart-main">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>市场指数走势</span>
+                    <span class="badge badge-up">+1.24%</span>
+                </div>
+                <div class="chart-container" id="mainChart">
+                    <!-- 图表条将由 JS 生成 -->
+                </div>
+            </div>
+
+            <!-- 债券列表 -->
+            <div class="card bond-list-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>热门债券</span>
+                </div>
+                <ul class="bond-list">
+                    <li class="bond-item">
+                        <div class="bond-info">
+                            <span class="bond-code">230001.IB</span>
+                            <span class="bond-name">23 国债 01</span>
+                        </div>
+                        <div class="bond-price">
+                            <div class="bond-yield">2.85%</div>
+                            <div class="bond-change badge badge-up">+0.12%</div>
+                        </div>
+                    </li>
+                    <li class="bond-item">
+                        <div class="bond-info">
+                            <span class="bond-code">230002.IB</span>
+                            <span class="bond-name">23 国债 02</span>
+                        </div>
+                        <div class="bond-price">
+                            <div class="bond-yield">2.92%</div>
+                            <div class="bond-change badge badge-up">+0.08%</div>
+                        </div>
+                    </li>
+                    <li class="bond-item">
+                        <div class="bond-info">
+                            <span class="bond-code">230201.IB</span>
+                            <span class="bond-name">23 国开 01</span>
+                        </div>
+                        <div class="bond-price">
+                            <div class="bond-yield">3.05%</div>
+                            <div class="bond-change badge badge-down">-0.05%</div>
+                        </div>
+                    </li>
+                    <li class="bond-item">
+                        <div class="bond-info">
+                            <span class="bond-code">230301.IB</span>
+                            <span class="bond-name">23 农发 01</span>
+                        </div>
+                        <div class="bond-price">
+                            <div class="bond-yield">2.98%</div>
+                            <div class="bond-change badge badge-up">+0.15%</div>
+                        </div>
+                    </li>
+                    <li class="bond-item">
+                        <div class="bond-info">
+                            <span class="bond-code">156890.SH</span>
+                            <span class="bond-name">华泰 01 公司债</span>
+                        </div>
+                        <div class="bond-price">
+                            <div class="bond-yield">4.20%</div>
+                            <div class="bond-change badge badge-up">+0.32%</div>
+                        </div>
+                    </li>
+                    <li class="bond-item">
+                        <div class="bond-info">
+                            <span class="bond-code">156891.SH</span>
+                            <span class="bond-name">万科 02 公司债</span>
+                        </div>
+                        <div class="bond-price">
+                            <div class="bond-yield">5.15%</div>
+                            <div class="bond-change badge badge-down">-0.18%</div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 订单簿 -->
+            <div class="card order-book-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>订单簿 - 23 国债 01</span>
+                </div>
+                <div class="order-book">
+                    <div class="order-header">买价</div>
+                    <div class="order-header">数量</div>
+                    <div class="order-header">卖价</div>
+
+                    <div class="order-row bid">
+                        <span class="order-price-bid">102.45</span>
+                        <span>5,000</span>
+                        <span class="order-price-ask">102.48</span>
+                    </div>
+                    <div class="order-row bid">
+                        <span class="order-price-bid">102.44</span>
+                        <span>8,500</span>
+                        <span class="order-price-ask">102.49</span>
+                    </div>
+                    <div class="order-row bid">
+                        <span class="order-price-bid">102.43</span>
+                        <span>12,000</span>
+                        <span class="order-price-ask">102.50</span>
+                    </div>
+                    <div class="order-row bid">
+                        <span class="order-price-bid">102.42</span>
+                        <span>6,200</span>
+                        <span class="order-price-ask">102.51</span>
+                    </div>
+                    <div class="order-row bid">
+                        <span class="order-price-bid">102.41</span>
+                        <span>15,800</span>
+                        <span class="order-price-ask">102.52</span>
+                    </div>
+                    <div class="order-row bid">
+                        <span class="order-price-bid">102.40</span>
+                        <span>20,000</span>
+                        <span class="order-price-ask">102.53</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 最新交易 -->
+            <div class="card recent-trades-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>最新成交</span>
+                </div>
+                <ul class="trade-list">
+                    <li class="trade-item">
+                        <span class="trade-code">230001.IB</span>
+                        <span class="trade-type buy">买入</span>
+                        <span class="trade-price">102.46</span>
+                        <span class="trade-volume">1,000</span>
+                    </li>
+                    <li class="trade-item">
+                        <span class="trade-code">230002.IB</span>
+                        <span class="trade-type sell">卖出</span>
+                        <span class="trade-price">101.85</span>
+                        <span class="trade-volume">5,000</span>
+                    </li>
+                    <li class="trade-item">
+                        <span class="trade-code">230201.IB</span>
+                        <span class="trade-type buy">买入</span>
+                        <span class="trade-price">103.12</span>
+                        <span class="trade-volume">2,500</span>
+                    </li>
+                    <li class="trade-item">
+                        <span class="trade-code">156890.SH</span>
+                        <span class="trade-type buy">买入</span>
+                        <span class="trade-price">98.50</span>
+                        <span class="trade-volume">10,000</span>
+                    </li>
+                    <li class="trade-item">
+                        <span class="trade-code">230001.IB</span>
+                        <span class="trade-type sell">卖出</span>
+                        <span class="trade-price">102.45</span>
+                        <span class="trade-volume">3,000</span>
+                    </li>
+                    <li class="trade-item">
+                        <span class="trade-code">230301.IB</span>
+                        <span class="trade-type buy">买入</span>
+                        <span class="trade-price">101.28</span>
+                        <span class="trade-volume">7,500</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- 快速交易 -->
+            <div class="card quick-trade-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>快速交易</span>
+                </div>
+                <div class="trade-form">
+                    <div class="trade-tabs">
+                        <button class="trade-tab buy active">买入</button>
+                        <button class="trade-tab sell">卖出</button>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">债券代码</label>
+                        <input type="text" class="form-input" value="230001.IB" placeholder="输入债券代码">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">价格</label>
+                        <input type="number" class="form-input" value="102.46" step="0.01" placeholder="输入价格">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">数量</label>
+                        <input type="number" class="form-input" value="10000" step="1000" placeholder="输入数量">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">总金额</label>
+                        <input type="text" class="form-input" value="¥ 10,246,000" readonly>
+                    </div>
+                    <button class="trade-btn buy">确认买入</button>
+                </div>
+            </div>
+
+            <!-- 市场深度 -->
+            <div class="card market-depth-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>市场深度</span>
+                </div>
+                <div class="depth-chart" id="depthChart">
+                    <!-- 深度图条将由 JS 生成 -->
+                </div>
+            </div>
+
+            <!-- 持仓概览 -->
+            <div class="card positions-card">
+                <div class="card-header">
+                    <span class="card-title"><span class="card-title-icon"></span>持仓概览</span>
+                </div>
+                <table class="positions-table">
+                    <thead>
+                        <tr>
+                            <th>债券代码</th>
+                            <th>债券名称</th>
+                            <th>持仓数量</th>
+                            <th>成本价</th>
+                            <th>市价</th>
+                            <th>盈亏</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>230001.IB</td>
+                            <td>23 国债 01</td>
+                            <td>50,000</td>
+                            <td>101.50</td>
+                            <td>102.46</td>
+                            <td class="stat-change positive">+4.80%</td>
+                        </tr>
+                        <tr>
+                            <td>230002.IB</td>
+                            <td>23 国债 02</td>
+                            <td>30,000</td>
+                            <td>102.00</td>
+                            <td>101.85</td>
+                            <td class="stat-change negative">-0.74%</td>
+                        </tr>
+                        <tr>
+                            <td>230201.IB</td>
+                            <td>23 国开 01</td>
+                            <td>25,000</td>
+                            <td>102.80</td>
+                            <td>103.12</td>
+                            <td class="stat-change positive">+1.56%</td>
+                        </tr>
+                        <tr>
+                            <td>156890.SH</td>
+                            <td>华泰 01 公司债</td>
+                            <td>20,000</td>
+                            <td>97.50</td>
+                            <td>98.50</td>
+                            <td class="stat-change positive">+5.13%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 生成主图表
+        function generateMainChart() {
+            const container = document.getElementById('mainChart');
+            const data = [35, 45, 40, 55, 50, 65, 60, 75, 70, 85, 80, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 40, 50, 60, 70, 80];
+
+            data.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${value}%`;
+                bar.style.animationDelay = `${index * 0.05}s`;
+                bar.title = `时间：${index}:00, 指数：${(1000 + value * 10).toFixed(2)}`;
+                container.appendChild(bar);
+            });
+        }
+
+        // 生成市场深度图
+        function generateDepthChart() {
+            const container = document.getElementById('depthChart');
+            const bidData = [20, 35, 45, 60, 75, 85, 70, 55, 40, 25];
+            const askData = [25, 40, 55, 70, 85, 75, 60, 45, 35, 20];
+
+            // 买单（左侧）
+            bidData.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'depth-bar bid';
+                bar.style.height = `${value}%`;
+                bar.style.width = `${100 / bidData.length}%`;
+                container.appendChild(bar);
+            });
+
+            // 卖单（右侧）
+            askData.forEach((value, index) => {
+                const bar = document.createElement('div');
+                bar.className = 'depth-bar ask';
+                bar.style.height = `${value}%`;
+                bar.style.width = `${100 / askData.length}%`;
+                container.appendChild(bar);
+            });
+        }
+
+        // 交易标签切换
+        document.querySelectorAll('.trade-tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                document.querySelectorAll('.trade-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                const btn = document.querySelector('.trade-btn');
+                const isBuy = this.classList.contains('buy');
+
+                btn.className = `trade-btn ${isBuy ? 'buy' : 'sell'}`;
+                btn.textContent = isBuy ? '确认买入' : '确认卖出';
+            });
+        });
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', () => {
+            generateMainChart();
+            generateDepthChart();
+        });
+
+        // 模拟实时数据更新
+        setInterval(() => {
+            const statValues = document.querySelectorAll('.stat-value');
+            statValues.forEach(stat => {
+                if (Math.random() > 0.7) {
+                    stat.style.opacity = '0.7';
+                    setTimeout(() => {
+                        stat.style.opacity = '1';
+                    }, 200);
+                }
+            });
+        }, 3000);
+    </script>
+</body>
+</html>

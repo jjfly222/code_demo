@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todo List - 渐变玻璃风格</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="container">
+        <div class="glass-card">
+            <h1>
+                <span class="icon">✨</span>
+                我的待办清单
+            </h1>
+
+            <div class="input-section">
+                <input
+                    type="text"
+                    id="todoInput"
+                    placeholder="添加新任务..."
+                    autocomplete="off"
+                >
+                <button id="addBtn" class="add-btn">
+                    <span>+</span>
+                </button>
+            </div>
+
+            <div class="stats">
+                <span id="totalTasks">共 0 项</span>
+                <span id="completedTasks">已完成 0 项</span>
+            </div>
+
+            <ul id="todoList" class="todo-list"></ul>
+
+            <div class="empty-state" id="emptyState">
+                <div class="empty-icon">📝</div>
+                <p>还没有任务，添加一个开始吧！</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
